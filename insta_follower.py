@@ -7,6 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 
+SEARCH_WORD = "Python"
+
 
 class InstaFollower:
 
@@ -17,6 +19,7 @@ class InstaFollower:
         chrome_options = Options()
         chrome_options.add_experimental_option("detach", True)
         self.driver = webdriver.Chrome(options=chrome_options)
+        self.account_name_list = None
 
     def login(self):
         ig_login_url = "https://www.instagram.com/"
@@ -56,7 +59,16 @@ class InstaFollower:
         time.sleep(1)
 
     def find_followers(self):
-        pass
+        search_button_el = self.driver.find_element(by=By.CSS_SELECTOR, value='svg[aria-label="Search"]')
+        search_button_el.click()
+        time.sleep(1)
+        search_field_el = self.driver.find_element(by=By.CSS_SELECTOR, value='input[aria-label="Search input"]')
+        search_field_el.click()
+        search_field_el.send_keys(SEARCH_WORD)
+        time.sleep(1)
+        account_name_els_list = self.driver.find_elements(by=By.CSS_SELECTOR, value='div[class="_aacl _aaco _aacw '
+                                                                                    '_aacx _aad6"]')
+        self.account_name_list = [account.text for account in account_name_els_list]
 
     def follow(self):
-        pass
+        print(self.account_name_list)
