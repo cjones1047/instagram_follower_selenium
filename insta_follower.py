@@ -28,35 +28,6 @@ class InstaFollower:
         username_input_el = self.driver.find_element(by=By.NAME, value="username")
         username_input_el.click()
         username_input_el.send_keys(self.ig_username, Keys.TAB, self.ig_password, Keys.ENTER)
-        # time.sleep(3)
-        # try:
-        #     avoid_save_info_el = self.driver.find_element(by=By.CSS_SELECTOR, value='button[class="_acan _acao '
-        #                                                                             '_acas _aj1-"]')
-        #     avoid_save_info_el.click()
-        #     time.sleep(1)
-        # except NoSuchElementException:
-        #     pass
-        # try:
-        #     avoid_save_info_el = self.driver.find_element(by=By.CSS_SELECTOR, value='span[class="_2iem"]')
-        #     avoid_save_info_el.click()
-        #     time.sleep(1)
-        # except NoSuchElementException:
-        #     pass
-        # # log_in_button = self.driver.find_element(by=By.CSS_SELECTOR, value='a[href="/accounts/login/?next=%2F&'
-        # #                                                                    'source=logged_out_half_sheet"]')
-        # # log_in_button.click()
-        # # time.sleep(1)
-        # # username_input_el = self.driver.find_element(by=By.NAME, value="username")
-        # # username_input_el.click()
-        # # username_input_el.send_keys(self.ig_username, Keys.TAB, self.ig_password, Keys.ENTER)
-        # # time.sleep(1)
-        # # avoid_save_info_el = self.driver.find_element(by=By.CSS_SELECTOR, value='button[class="_acan _acao '
-        # #                                                                         '_acas _aj1-"]')
-        # # avoid_save_info_el.click()
-        # # time.sleep(1)
-        # avoid_notifications_el = self.driver.find_element(by=By.CSS_SELECTOR, value='button[class="_a9-- _a9_1"]')
-        # avoid_notifications_el.click()
-        # time.sleep(1)
 
     def find_followers(self):
         followers_found = False
@@ -72,10 +43,62 @@ class InstaFollower:
                 search_field_el.click()
                 search_field_el.send_keys(SEARCH_WORD)
                 time.sleep(1)
-                account_name_els_list = self.driver.find_elements(by=By.CSS_SELECTOR, value='div[class="_aacl _aaco _aacw '
-                                                                                            '_aacx _aad6"]')
-                self.account_name_list = [account.text for account in account_name_els_list]
+                account_name_els_list = self.driver.find_elements(by=By.CSS_SELECTOR, value='div[class="_aacl _aaco '
+                                                                                            '_aacw _aacx _aad6"]')
+                self.account_name_list = [account.text for account in account_name_els_list[:10]
+                                          if len(account.text) > 0]
                 followers_found = True
 
     def follow(self):
-        print(self.account_name_list)
+        for account in self.account_name_list:
+            account_is_hashtag = False
+            if account[0] == "#":
+                account_url = f"https://www.instagram.com/explore/tags/{account[1:]}/?next=%2F"
+                account_is_hashtag = True
+            else:
+                account_url = f"https://www.instagram.com/{account}/?next=%2F"
+            self.driver.get(account_url)
+            account_followed = False
+            if account_is_hashtag:
+                while not account_followed:
+                    # if hashtag HAS been followed
+                    try:
+                        self.driver.find_element(by=By.CSS_SELECTOR,
+                                                 value='button[class="_acan _acap _acaq _acat _aj1-"]')
+                    except NoSuchElementException:
+                        pass
+                    else:
+                        break
+
+                    # if hashtag has NOT been followed
+                    try:
+                        follow_hashtag_button_el = self.driver.find_element(by=By.CSS_SELECTOR,
+                                                                            value='button[class="_acan '
+                                                                                  '_acap _acaq _acas '
+                                                                                  '_aj1-"]')
+                    except NoSuchElementException:
+                        pass
+                    else:
+                        follow_hashtag_button_el.click()
+                        account_followed = True
+
+            else:
+                while not account_followed:
+                    # if account HAS been followed
+                    try:
+                        self.driver.find_element(by=By.CSS_SELECTOR, value='button[class="_acan _acap _acat _aj1-"]')
+                    except NoSuchElementException:
+                        pass
+                    else:
+                        break
+
+                    # if account has NOT been followed
+                    try:
+                        follow_button_el = self.driver.find_element(by=By.CSS_SELECTOR,
+                                                                    value='button[class="_acan _acap '
+                                                                          '_acas _aj1-"]')
+                    except NoSuchElementException:
+                        pass
+                    else:
+                        follow_button_el.click()
+                        account_followed = True
